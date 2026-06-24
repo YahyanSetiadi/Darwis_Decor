@@ -20,6 +20,14 @@
             <input type="text" name="no_hp" value="{{ old('no_hp') }}"
                    class="mt-2 w-full px-4 py-3.5 rounded-xl bg-white border border-stone-200/80 text-sm font-light text-stone-800 focus:outline-none focus:border-stone-800" required />
         </div>
+
+        {{-- Tambahan: Alamat --}}
+        <div class="md:col-span-3">
+            <label class="block text-[11px] tracking-widest uppercase font-medium" style="color: rgba(75,75,48,0.75);">Alamat</label>
+            <input type="text" name="alamat" value="{{ old('alamat') }}"
+                   class="mt-2 w-full px-4 py-3.5 rounded-xl bg-white border border-stone-200/80 text-sm font-light text-stone-800 focus:outline-none focus:border-stone-800" required />
+        </div>
     </div>
 </div>
+
 

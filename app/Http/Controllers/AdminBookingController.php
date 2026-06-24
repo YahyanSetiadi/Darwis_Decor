@@ -23,5 +23,18 @@ class AdminBookingController extends Controller
 
         return redirect()->route('admin.bookings.index')->with('success', "Booking #{$booking->id} approved.");
     }
+
+    public function destroy(Booking $booking)
+    {
+        // Biar aman, delete hanya untuk status pending
+        if ($booking->status !== 'pending') {
+            return redirect()->route('admin.bookings.pending')->with('success', 'Booking tidak dapat dihapus karena sudah diproses.');
+        }
+
+        $booking->delete();
+
+        return redirect()->route('admin.bookings.pending')->with('success', "Booking #{$booking->id} deleted.");
+    }
 }
+
 

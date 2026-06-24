@@ -115,17 +115,14 @@
                         {{-- LIST TAMBAHAN --}}
                         @php
                             $options = [
-                                ['id' => 'custom_decor', 'name' => 'Custom Decor', 'desc' => '3jt (untuk 3 meter, untuk penambahan 1 jt/meter)'],
-                                ['id' => 'melamin_jalan', 'name' => 'Melamin Jalan', 'desc' => '3jt (untuk 3 meter)'],
-                                ['id' => 'mix_fresh_flowers', 'name' => 'Mix Fresh Flowers', 'desc' => '1.5jt untuk ..'],
-                                ['id' => 'upgrade_size_decor', 'name' => 'Upgrade Size Decor', 'desc' => '1jt/meter'],
+                                ['id' => 'mix_fresh_flowers', 'name' => 'Mix Fresh Flowers', 'desc' => '1.5jt untuk decor 4 meter'],
                                 ['id' => 'photobooth_musik', 'name' => 'Photobooth/Center Piece/Backdrop Musik', 'desc' => '1jt (band dan 2 penyanyi)'],
                                 ['id' => 'lighting_effect', 'name' => 'Lighting Effect', 'desc' => '3jt (untuk 5 titik lampu)'],
-                                ['id' => 'pohon_decor', 'name' => 'Pohon Decor', 'desc' => '1.5jt (untuk 1 pohon, untuk penambahan 1 jt/pohon)'],
                                 ['id' => 'pergola', 'name' => 'Pergola 4x4 / 6x6', 'desc' => '4x4 2.5jt / 6x6 4jt'],
                                 ['id' => 'kain_lorong', 'name' => 'Kain Lorong / Decor 4x6', 'desc' => '6jt'],
                             ];
                         @endphp
+
 
                         @foreach($options as $opt)
                             <label class="flex flex-col p-4 bg-white border border-stone-200 rounded-2xl cursor-pointer hover:border-[#afa857] transition-all has-[:checked]:border-[#4b4b30] has-[:checked]:bg-[#4b4b30]/5 shadow-sm">
@@ -137,14 +134,21 @@
                             </label>
                         @endforeach
 
-                        {{-- INPUT KUANTITAS --}}
-                        @foreach(['meja' => ['name' => 'Meja', 'desc' => '30 rb /pcs'], 'kursi' => ['name' => 'Kursi', 'desc' => '15 rb/pcs']] as $id => $item)
+                        {{-- INPUT KUANTITAS (4 item diminta: pakai QTY seperti meja-kursi) --}}
+                        @foreach([
+                            'custom_decor' => ['name' => 'Custom Decor', 'desc' => '3jt (untuk 3 meter, penambahan 1 jt/meter)', 'min' => 0],
+                            'melamin_jalan' => ['name' => 'Melamin Jalan', 'desc' => '3jt (untuk 3 meter)', 'min' => 0],
+                            'upgrade_size_decor' => ['name' => 'Upgrade Size Decor', 'desc' => '1jt/meter', 'min' => 0],
+                            'pohon_decor' => ['name' => 'Pohon Decor', 'desc' => '1.5jt/pohon', 'min' => 0],
+                            'meja' => ['name' => 'Meja', 'desc' => '30 rb /pcs', 'min' => 0],
+                            'kursi' => ['name' => 'Kursi', 'desc' => '15 rb/pcs', 'min' => 0],
+                        ] as $id => $item)
                             <div class="p-4 bg-white border border-stone-200 rounded-2xl flex items-center justify-between shadow-sm">
                                 <div>
                                     <p class="text-sm font-semibold text-stone-800">{{ $item['name'] }}</p>
                                     <p class="text-[10px] text-stone-400 italic">{{ $item['desc'] }}</p>
                                 </div>
-                                <input type="number" name="qty[{{ $id }}]" min="0" placeholder="0" 
+                                <input type="number" name="qty[{{ $id }}]" min="{{ $item['min'] }}" placeholder="0" 
                                     class="w-16 p-2 text-center border border-stone-200 rounded-xl text-sm focus:border-[#afa857] focus:ring-1 focus:ring-[#afa857] outline-none">
                             </div>
                         @endforeach

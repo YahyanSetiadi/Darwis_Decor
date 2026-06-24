@@ -1,7 +1,7 @@
-# TODO - Checkout page update
+# TODO
 
-- [ ] Hapus include item tambahan: `@include('user.layouts.header')` dari `resources/views/user/booking/checkout.blade.php`
-- [x] Hapus/disable blok `<style>` yang ada di `checkout.blade.php` sesuai instruksi
-- [x] Ganti section list addons pada step 03 menjadi teks:
-    - Poin Tambahan (Di Luar Paket) + numbering /01 s.d /09 sesuai permintaan
-    - (Tanpa mekanisme image/checkbox)
+- [x] Tambah route delete booking (admin) di `routes/web.php`
+- [x] Tambah method delete/destroy di `app/Http/Controllers/AdminBookingController.php`
+- [x] Tambah tombol aksi Delete di `resources/views/admin/bookings/pending.blade.php` (hanya untuk status `pending`)
+
+- [x] Test manual: coba delete dari halaman pending, pastikan redirect + pesan success muncul

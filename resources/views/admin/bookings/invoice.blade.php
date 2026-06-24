@@ -113,7 +113,7 @@
 
         <div class="text-center sm:text-right flex flex-col items-center sm:items-end self-center sm:self-start">
             <div class="w-16 h-16 rounded-full border border-stone-900 flex items-center justify-center font-serif text-2xl font-semibold tracking-tighter text-stone-900 shadow-inner">
-                D
+                <img src="{{ asset('img/logo.png') }}" alt="">
             </div>
             <span class="text-xs font-bold tracking-widest text-stone-900 uppercase mt-2 block">Darwis Decor</span>
         </div>

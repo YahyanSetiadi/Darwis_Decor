@@ -51,7 +51,7 @@
                 </div>
                 <div class="border-x border-white/10">
                     <p class="text-xs tracking-widest uppercase mb-1 font-medium" style="color: rgba(212,175,55,0.85);">Transparent</p>
-                    <p class="text-xs md:text-sm text-white/80">Tanpa Biaya Siluman</p>
+                    <p class="text-xs md:text-sm text-white/80">Harga Jujur, Tanpa Tambahan</p>
                 </div>
                 <div>
                     <p class="text-xs tracking-widest uppercase mb-1 font-medium" style="color: rgba(212,175,55,0.85);">Meticulous</p>
@@ -127,12 +127,12 @@
                         
                         <!-- Foto Utama (Belakang) -->
                         <div class="absolute top-0 left-0 w-[80%] h-[85%] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white transform -rotate-2">
-                            <img src="https://images.unsplash.com/photo-1594551801881-297d7bd749d9?w=800&auto=format&fit=crop&q=80" alt="Wedding Detail" class="w-full h-full object-cover" />
+                            <img src="{{ asset('img/rumah/SnapInsta.to_620873945_18393939697176423_2483298379153175513_n.jpg') }}" alt="Wedding Detail" class="w-full h-full object-cover" loading="lazy" />
                         </div>
 
                         <!-- Foto Kedua (Depan - Bertumpuk Menyilang) -->
                         <div class="absolute bottom-0 right-0 w-[65%] h-[65%] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white transform rotate-3">
-                            <img src="https://images.unsplash.com/photo-1519225495810-7512c696505a?w=800&auto=format&fit=crop&q=80" alt="Wedding Event" class="w-full h-full object-cover" />
+                            <img src="{{ asset('img/rumah/SnapInsta.to_620873945_18393939697176423_2483298379153175513_n.jpg') }}" alt="Wedding Event" class="w-full h-full object-cover" loading="lazy" />
                         </div>
 
                         <!-- Floating Card Kecil yang Elegan (Kaca Blur) -->
@@ -342,27 +342,46 @@
                 </p>
             </div>
             
-            <div class="mb-12 flex flex-wrap items-center justify-center gap-3">
-                <button data-filter="all" class="filter-btn px-5 py-2 rounded-full bg-stone-900 text-stone-100 text-xs tracking-widest uppercase font-medium transition-all duration-300 shadow-sm">All Concepts</button>
-                <button data-filter="Tradisional" class="filter-btn px-5 py-2 rounded-full bg-stone-50 border border-stone-200/60 text-stone-600 text-xs tracking-widest uppercase font-light hover:bg-stone-100 hover:text-stone-900 transition-all duration-300">Tradisional</button>
-                <button data-filter="Intimate" class="filter-btn px-5 py-2 rounded-full bg-stone-50 border border-stone-200/60 text-stone-600 text-xs tracking-widest uppercase font-light hover:bg-stone-100 hover:text-stone-900 transition-all duration-300">Intimate</button>
-                <button data-filter="Outdoor" class="filter-btn px-5 py-2 rounded-full bg-stone-50 border border-stone-200/60 text-stone-600 text-xs tracking-widest uppercase font-light hover:bg-stone-100 hover:text-stone-900 transition-all duration-300">Outdoor</button>
-                <button data-filter="Modern" class="filter-btn px-5 py-2 rounded-full bg-stone-50 border border-stone-200/60 text-stone-600 text-xs tracking-widest uppercase font-light hover:bg-stone-100 hover:text-stone-900 transition-all duration-300">Modern</button>
-            </div>
-
             <!-- Gallery Grid Area -->
             <!-- Menggunakan grid yang lebih fleksibel, rapi, dan responsif -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @php $gals = [
-                    ['img'=>'https://images.unsplash.com/photo-1715588837113-80441978e93e?w=600&auto=format&fit=crop&q=80','theme'=>'Tradisional', 'title'=>'The Royal Javanese'],
-                    ['img'=>'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=800&q=80','theme'=>'Modern', 'title'=>'Minimalist Elegance'],
-                    ['img'=>'https://images.unsplash.com/photo-1607190074257-dd4b7af0309f?auto=format&fit=crop&w=800&q=80','theme'=>'Intimate', 'title'=>'Warm Rustic Love'],
-                    ['img'=>'https://images.unsplash.com/photo-1583939411023-14783179e581?w=600&auto=format&fit=crop&q=80','theme'=>'Outdoor', 'title'=>'Botanical Garden'],
-                    ['img'=>'https://images.unsplash.com/photo-1523437626977-ff7c8b3f5a9a?auto=format&fit=crop&w=800&q=80','theme'=>'Modern', 'title'=>'The White Symphony'],
-                    ['img'=>'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80','theme'=>'Tradisional', 'title'=>'Classic Minang Vows'],
-                    ['img'=>'https://images.unsplash.com/photo-1521791055366-0d553872150a?auto=format&fit=crop&w=800&q=80','theme'=>'Intimate', 'title'=>'Ethereal Dinner'],
-                    ['img'=>'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&auto=format&fit=crop&q=80','theme'=>'Outdoor', 'title'=>'Sunset Serenade'],
-                ]; @endphp
+                @php
+                    $thumbExt = ['jpg','jpeg','png','webp'];
+                    $rumahDir = public_path('img/rumah');
+                    $gedungDir = public_path('img/Gedungandintimate');
+
+                    $rumahFiles = is_dir($rumahDir) ? scandir($rumahDir) : [];
+                    $gedungFiles = is_dir($gedungDir) ? scandir($gedungDir) : [];
+
+                    $all = [];
+                    foreach ($rumahFiles as $f) {
+                        $f = (string)$f;
+                        if ($f === '.' || $f === '..') continue;
+                        $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                        if (!in_array($ext, $thumbExt, true)) continue;
+                        $all[] = [
+                            'img' => asset('img/rumah/' . $f),
+                            'theme' => 'rumah',
+                            'title' => $f,
+                        ];
+                    }
+                    foreach ($gedungFiles as $f) {
+                        $f = (string)$f;
+                        if ($f === '.' || $f === '..') continue;
+                        $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                        if (!in_array($ext, $thumbExt, true)) continue;
+                        $all[] = [
+                            'img' => asset('img/Gedungandintimate/' . $f),
+                            'theme' => 'Gedungandintimate',
+                            'title' => $f,
+                        ];
+                    }
+
+                    // tampilkan maksimal 8 di depan
+                    $gals = array_slice($all, 0, 8);
+                    // untuk lightbox: semua gambar
+                    $allForLightbox = $all;
+                @endphp
 
                 @foreach($gals as $gal)
                     <!-- Card Item dengan Smooth Hover Transition -->
@@ -378,21 +397,21 @@
                             data-title="{{ $gal['title'] }}"
                             data-theme="{{ $gal['theme'] }}"
                         />
-                        
+
                         <!-- Luxury Vignette Overlay (Makin gelap saat di-hover) -->
                         <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent opacity-90 group-hover:from-stone-950/95 transition-all duration-300"></div>
                         
-                        <!-- Top Badge (Pindah ke kanan atas dengan style kaca minimalis) -->
+                        <!-- Top Badge -->
                         <div class="absolute top-4 right-4 z-10">
                             <span class="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white/90 border border-white/10 text-[10px] tracking-widest uppercase font-light">
                                 {{ $gal['theme'] }}
                             </span>
                         </div>
 
-                        <!-- Bottom Text Info (Slide Up effect saat di-hover) -->
+                        <!-- Bottom Text Info -->
                         <div class="absolute bottom-0 left-0 right-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                             <h3 class="font-serif text-lg text-white font-normal tracking-wide mb-1 opacity-90 group-hover:opacity-100 transition-opacity">
-                                {{ $gal['title'] }}
+                                {{-- {{ $gal['title'] }} --}}
                             </h3>
                             <p class="text-[11px] tracking-widest uppercase font-light opacity-0 group-hover:opacity-100 transition-all duration-500 delay-70" style="color: rgba(175,168,87,0.9);">
                                 View Showcase <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
@@ -400,6 +419,9 @@
                         </div>
                     </div>
                 @endforeach
+
+                {{-- Simpan semua data untuk lightbox --}}
+                <script type="application/json" id="portfolioAllImagesJson">{!! json_encode($allForLightbox, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) !!}</script>
             </div>
             
         </div>
@@ -519,7 +541,7 @@
                                 <div>Sab</div>
                             </div>
 
-@php
+                    @php
                             use App\Models\Booking;
                             use Carbon\Carbon;
 
@@ -536,10 +558,10 @@
 
                                 $bookings = Booking::query()
                                 		->whereBetween('tanggal_booking', [$startDate->toDateString(), $endDate->toDateString()])
-                                ->select(['tanggal_booking'])
+                                ->select(['tanggal_booking','nama_customer'])
                                 ->get();
 
-                                // map booked days per bulan: ['YYYY-MM' => [day1, day2, ...]]
+                                // map booked days per bulan: ['YYYY-MM' => [day1 => 'Nama Customer', day2 => 'Nama Customer', ...]]
                             // catatan: aturan status tidak digunakan (semua tanggal dari tabel bookings akan dianggapBooked)
                             $bookedMap = [];
                             foreach ($bookings as $b) {
@@ -549,7 +571,9 @@
                                 if (!isset($bookedMap[$key])) {
                                     $bookedMap[$key] = [];
                                 }
-                                $bookedMap[$key][$day] = true;
+
+                                $name = trim((string)($b->nama_customer ?? ''));
+                                $bookedMap[$key][$day] = $name !== '' ? $name : 'Pasangan lain';
                             }
 
                             // render 12 bulan (hanya 1 yang visible via JS)
@@ -573,7 +597,7 @@
                                     $isBooked = isset($bookedMap[$key]) && isset($bookedMap[$key][$dnum]);
                                     $calendarDays[$dnum] = [
                                         'status' => $isBooked ? 'Booked' : 'Available',
-                                        'note' => $isBooked ? 'Sudah dibooking oleh pasangan lain.' : 'Slot Weekday Bebas',
+                                        'note' => $isBooked ? 'Sudah dibooking oleh: ' . $bookedMap[$key][$dnum] : 'Slot Weekday Bebas',
                                     ];
                                     // note weekend simple
                                     if (!$isBooked) {
@@ -988,8 +1012,23 @@
                 const prevBtn = document.getElementById('portfolioLightboxPrev');
                 const nextBtn = document.getElementById('portfolioLightboxNext');
 
-                const thumbnails = Array.from(document.querySelectorAll('#portfolio img[data-img][data-title][data-theme]'));
-                const state = { index: 0, open: false };
+                    const thumbnails = (() => {
+                        const el = document.getElementById('portfolioAllImagesJson');
+                        if(!el) return Array.from(document.querySelectorAll('#portfolio img[data-img][data-title][data-theme]'));
+                        try {
+                            const data = JSON.parse(el.textContent || '[]');
+                            return data.map((item) => ({
+                                dataset: {
+                                    img: item.img,
+                                    title: item.title,
+                                    theme: item.theme
+                                }
+                            }));
+                        } catch (e) {
+                            return Array.from(document.querySelectorAll('#portfolio img[data-img][data-title][data-theme]'));
+                        }
+                    })();
+                    const state = { index: 0, open: false };
 
                 const clampIndex = (i) => {
                     const n = thumbnails.length;

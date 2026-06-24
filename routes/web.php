@@ -52,5 +52,14 @@ Route::prefix('admin')->group(function () {
 
         return app(\App\Http\Controllers\AdminBookingController::class)->approve($booking);
     })->name('admin.bookings.approve');
+
+    Route::post('/bookings/{booking}/delete', function (\App\Models\Booking $booking) {
+        if (!\Illuminate\Support\Facades\Auth::check() || (int) (\Illuminate\Support\Facades\Auth::user()->is_active ?? 0) !== 1) {
+            return redirect()->route('admin.login');
+        }
+
+        return app(\App\Http\Controllers\AdminBookingController::class)->destroy($booking);
+    })->name('admin.bookings.delete');
 });
+
 

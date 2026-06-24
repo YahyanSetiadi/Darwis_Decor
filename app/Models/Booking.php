@@ -20,7 +20,9 @@ class Booking extends Model
         'nama_customer',
         'email_customer',
         'no_hp',
+        'alamat',
     ];
+
 
     protected $casts = [
         'tanggal_booking' => 'date',

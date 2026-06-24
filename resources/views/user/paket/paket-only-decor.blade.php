@@ -6,15 +6,64 @@
     $contactLine = 'Booking & Konsultasi: WhatsApp';
     $contactLink = 'https://wa.me/';
 
-    $coverPhoto = 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1400&q=80';
-    $pagePhoto = [
-        'https://images.unsplash.com/photo-1529634806980-85c44a7d7f39?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1506846732259-39cc68a7f7f0?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1515168833906-7c3c3c3c3c3c?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
-    ];
+    // Ambil foto dari folder lokal (tanpa ubah layout lain)
+    $rumahDir = public_path('img/rumah');
+    $gedungDir = public_path('img/Gedungandintimate');
+
+    $allowedExt = ['jpg','jpeg','png','webp'];
+    $isImage = function($file) use ($allowedExt) {
+        if(!$file) return false;
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        return in_array($ext, $allowedExt, true);
+    };
+
+    $rumahFiles = is_dir($rumahDir) ? array_values(array_filter(scandir($rumahDir), function($f) use ($rumahDir, $isImage) {
+        if($f === '.' || $f === '..') return false;
+        $path = $rumahDir . DIRECTORY_SEPARATOR . $f;
+        return is_file($path) && $isImage($f);
+    })) : [];
+
+    $gedungFiles = is_dir($gedungDir) ? array_values(array_filter(scandir($gedungDir), function($f) use ($gedungDir, $isImage) {
+        if($f === '.' || $f === '..') return false;
+        $path = $gedungDir . DIRECTORY_SEPARATOR . $f;
+        return is_file($path) && $isImage($f);
+    })) : [];
+
+    // Gabungkan rumah + gedung, lalu ambil urutannya untuk cover & 6 halaman
+    $allFiles = array_merge(
+        array_map(function($f){ return ['theme' => 'rumah', 'file' => $f]; }, $rumahFiles),
+        array_map(function($f){ return ['theme' => 'Gedungandintimate', 'file' => $f]; }, $gedungFiles)
+    );
+
+    $allFiles = array_values($allFiles);
+
+    // Default fallback kalau folder kosong
+    $fallback = 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1400&q=80';
+
+    // Build pool untuk dipakai cover + 6 halaman
+    // Sesuai request: untuk paket ini tampilkan yang ada di folder gedung saja.
+    $imgPool = [];
+    foreach($gedungFiles as $f){
+        if(!$f) continue;
+        $imgPool[] = asset('img/Gedungandintimate/' . $f);
+    }
+
+    // Hapus duplikat (penting biar tidak dobel gambar)
+    $imgPool = array_values(array_unique($imgPool));
+
+    // Cover ambil dari index 0
+    $coverPhoto = $imgPool[0] ?? $fallback;
+
+    // Halaman: ambil urut dari index 1..6 agar cover tidak kepakai ulang
+    // Jika ternyata file sedikit, baru fallback.
+    $pagePhoto = [];
+    // ambil 6 gambar berbeda dari pool (dimulai index 1)
+    for($i = 0; $i < 6; $i++){
+        $img = $imgPool[$i + 1] ?? null;
+        if(!$img) $img = $fallback;
+        $pagePhoto[] = $img;
+    };
+    
 @endphp
 
 <style>
@@ -457,10 +506,7 @@
 
                             {{-- Tombol Aksi di Bagian Bawah --}}
 @php
-                                /**
-                                 * Paket Only Decor diambil dari database agar id selalu valid.
-                                 * Hindari hardcode id yang bisa menyebabkan 404 pada route checkout.
-                                 */
+                                
                                 $onlyDecorPakets = \App\Models\Paket::where('kategori', 'only-decor')
                                     ->orderBy('id')
                                     ->pluck('id')

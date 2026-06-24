@@ -34,12 +34,20 @@
 @endsection
 
 @section('content')
+    @if (session('success'))
+        <div class="mb-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            <div class="font-semibold">Berhasil</div>
+            <div>{{ session('success') }}</div>
+        </div>
+    @endif
+
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div class="p-4 border-b border-gray-200 bg-gray-50">
             <div class="flex items-center justify-between gap-4">
                 <span class="text-sm font-medium text-gray-700">Antrian persetujuan</span>
             </div>
         </div>
+
 
         <div class="overflow-x-auto">
             <table class="table-auto w-full text-sm">
@@ -89,9 +97,20 @@
                                     <span class="text-xs text-gray-400">Sudah diproses</span>
                                 @endif
 
+                                @if($b->status === 'pending')
+                                    <form method="POST" action="{{ route('admin.bookings.delete', $b->id) }}" class="inline" onsubmit="return confirm('Yakin hapus booking #{{ $b->id }}?')">
+                                        @csrf
+                                        <button type="submit" class="ml-3 px-3 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endif
+
                                 <a href="{{ route('user.bookings.invoice', $b->id) }}" class="ml-3 px-3 py-2 rounded-xl bg-stone-100 text-gray-700 text-xs font-semibold hover:bg-stone-200 transition">
                                     Lihat Invoice
                                 </a>
+
+
                             </td>
                         </tr>
                     @empty

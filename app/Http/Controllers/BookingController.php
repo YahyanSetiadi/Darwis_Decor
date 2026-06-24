@@ -41,16 +41,12 @@ class BookingController extends Controller
             'bookingExtras.extra',
         ]);
 
-        // Hitung dari data relasi booking_extras yang tersimpan
-        // (biar list item & total benar-benar match dengan data invoice asli)
         $hargaPaket = (float) ($booking->paket->harga_mulai ?? 0);
 
         $bookingExtras = $booking->bookingExtras ?? collect();
 
         $hargaTambahan = (float) $bookingExtras->sum(fn ($row) => (float) ($row->subtotal ?? 0));
 
-        // DP/sisa sekarang pakai data booking yang ada.
-        // catatan: dp_amount bisa jadi belum ada kolomnya, jadi view punya fallback.
         $total = (float) ($booking->total ?? ($hargaPaket + $hargaTambahan));
 
         return view('admin.bookings.invoice', [
@@ -72,6 +68,8 @@ class BookingController extends Controller
             'nama_customer' => ['required', 'string', 'max:255'],
             'email_customer' => ['nullable', 'email', 'max:255'],
             'no_hp' => ['required', 'string', 'max:50'],
+            'alamat' => ['required', 'string', 'max:255'],
+
 
             // payload dari form checkout:
             // - addons[] (checkbox)
@@ -92,13 +90,11 @@ class BookingController extends Controller
 
         $tanggal = $data['tanggal_booking'];
 
-        // customer fields sudah diambil sebelum membuat booking
 
         $addons = $data['addons'] ?? [];
         $qtyMap = $data['qty'] ?? [];
 
-        // Biar kompatibel dengan 2 style UI (addons[] atau extras[*])
-        // Prioritas: jika extras[*] ada, pakai itu.
+        
         $extrasInput = $data['extras'] ?? null;
 
         if (is_array($extrasInput) && count($extrasInput) > 0) {
@@ -107,7 +103,6 @@ class BookingController extends Controller
                 return $qty > 0;
             }));
         } else {
-            // Convert addons[] key (dari blade) -> extra_id (dari tabel extras)
             $keyToExtraName = [
                 'custom_decor' => 'Custom Decor',
                 'melamin_jalan' => 'Melamin Jalan',
@@ -135,25 +130,64 @@ class BookingController extends Controller
                 ];
             }
 
-
-            // Map qty[meja]/qty[kursi] ke extra_id dari tabel extras
-            // Kita cari extra_id berdasarkan nama extra (karena di blade tidak mengirim extra_id untuk meja/kursi)
             $mejaQty = (int)($qtyMap['meja'] ?? 0);
             $kursiQty = (int)($qtyMap['kursi'] ?? 0);
 
             if ($mejaQty > 0) {
-                $mejaExtra = Extra::where('nama', 'Meja')->orWhere('nama', 'meja')->orWhereRaw('LOWER(nama)=?', ['meja'])->first();
+                $mejaExtra = Extra::where('nama', 'Meja')
+                    ->orWhere('nama', 'meja')
+                    ->orWhereRaw('LOWER(nama)=?', ['meja'])
+                    ->first();
                 if ($mejaExtra) {
                     $extras[] = ['extra_id' => $mejaExtra->id, 'qty' => $mejaQty];
                 }
             }
 
             if ($kursiQty > 0) {
-                $kursiExtra = Extra::where('nama', 'Kursi')->orWhere('nama', 'kursi')->orWhereRaw('LOWER(nama)=?', ['kursi'])->first();
+                $kursiExtra = Extra::where('nama', 'Kursi')
+                    ->orWhere('nama', 'kursi')
+                    ->orWhereRaw('LOWER(nama)=?', ['kursi'])
+                    ->first();
                 if ($kursiExtra) {
                     $extras[] = ['extra_id' => $kursiExtra->id, 'qty' => $kursiQty];
                 }
             }
+            
+            $customDecorQty = (int)($qtyMap['custom_decor'] ?? 0);
+            if ($customDecorQty > 0) {
+                $extraCustom = Extra::whereRaw('LOWER(nama) = ?', [mb_strtolower('Custom Decor')])->first();
+                if ($extraCustom) {
+                    $extras[] = ['extra_id' => $extraCustom->id, 'qty' => $customDecorQty];
+                }
+            }
+
+            // qty[melamin_jalan] => "Melamin Jalan"
+            $melaminJalanQty = (int)($qtyMap['melamin_jalan'] ?? 0);
+            if ($melaminJalanQty > 0) {
+                $extraMelamin = Extra::whereRaw('LOWER(nama) = ?', [mb_strtolower('Melamin Jalan')])->first();
+                if ($extraMelamin) {
+                    $extras[] = ['extra_id' => $extraMelamin->id, 'qty' => $melaminJalanQty];
+                }
+            }
+
+            // qty[upgrade_size_decor] => "Upgrade Size Decor"
+            $upgradeSizeQty = (int)($qtyMap['upgrade_size_decor'] ?? 0);
+            if ($upgradeSizeQty > 0) {
+                $extraUpgrade = Extra::whereRaw('LOWER(nama) = ?', [mb_strtolower('Upgrade Size Decor')])->first();
+                if ($extraUpgrade) {
+                    $extras[] = ['extra_id' => $extraUpgrade->id, 'qty' => $upgradeSizeQty];
+                }
+            }
+
+            // qty[pohon_decor] => "Pohon Decor"
+            $pohonDecorQty = (int)($qtyMap['pohon_decor'] ?? 0);
+            if ($pohonDecorQty > 0) {
+                $extraPohon = Extra::whereRaw('LOWER(nama) = ?', [mb_strtolower('Pohon Decor')])->first();
+                if ($extraPohon) {
+                    $extras[] = ['extra_id' => $extraPohon->id, 'qty' => $pohonDecorQty];
+                }
+            }
+
 
             // filter qty>0
             $extras = array_values(array_filter($extras, function ($row) {
@@ -206,7 +240,9 @@ class BookingController extends Controller
                 'nama_customer' => $namaCustomer,
                 'email_customer' => $emailCustomer,
                 'no_hp' => $noHp,
+                'alamat' => $data['alamat'],
             ]);
+
 
             foreach ($extraRows as $r) {
                 BookingExtra::create([
