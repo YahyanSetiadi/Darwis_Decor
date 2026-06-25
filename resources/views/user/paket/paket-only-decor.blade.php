@@ -6,64 +6,93 @@
     $contactLine = 'Booking & Konsultasi: WhatsApp';
     $contactLink = 'https://wa.me/';
 
-    // Ambil foto dari folder lokal (tanpa ubah layout lain)
+    // Ambil foto dari folder rumah saja (sesuai request)
     $rumahDir = public_path('img/rumah');
-    $gedungDir = public_path('img/Gedungandintimate');
 
-    $allowedExt = ['jpg','jpeg','png','webp'];
-    $isImage = function($file) use ($allowedExt) {
+    $allowedExt = ['jpg','jpeg','png','webp','JPG','JPEG','PNG','WEBP'];
+    $isImage = function(string $file) use ($allowedExt) {
         if(!$file) return false;
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
         return in_array($ext, $allowedExt, true);
     };
 
-    $rumahFiles = is_dir($rumahDir) ? array_values(array_filter(scandir($rumahDir), function($f) use ($rumahDir, $isImage) {
-        if($f === '.' || $f === '..') return false;
-        $path = $rumahDir . DIRECTORY_SEPARATOR . $f;
-        return is_file($path) && $isImage($f);
-    })) : [];
-
-    $gedungFiles = is_dir($gedungDir) ? array_values(array_filter(scandir($gedungDir), function($f) use ($gedungDir, $isImage) {
-        if($f === '.' || $f === '..') return false;
-        $path = $gedungDir . DIRECTORY_SEPARATOR . $f;
-        return is_file($path) && $isImage($f);
-    })) : [];
-
-    // Gabungkan rumah + gedung, lalu ambil urutannya untuk cover & 6 halaman
-    $allFiles = array_merge(
-        array_map(function($f){ return ['theme' => 'rumah', 'file' => $f]; }, $rumahFiles),
-        array_map(function($f){ return ['theme' => 'Gedungandintimate', 'file' => $f]; }, $gedungFiles)
-    );
-
-    $allFiles = array_values($allFiles);
-
-    // Default fallback kalau folder kosong
     $fallback = 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1400&q=80';
 
-    // Build pool untuk dipakai cover + 6 halaman
-    // Sesuai request: untuk paket ini tampilkan yang ada di folder gedung saja.
+    $preferredDirs = [
+        public_path('img/rumah/paket 1'),
+        public_path('img/rumah/paket 2'),
+        public_path('img/rumah/paket 3'),
+    ];
+
+    // Ambil semua image (non-rekursif) dari sebuah folder
+    $scanDirFiles = function(string $dir) use ($isImage) {
+        if(!is_dir($dir)) return [];
+        return array_values(array_filter(scandir($dir), function($f) use ($dir, $isImage) {
+            if($f === '.' || $f === '..') return false;
+            $path = $dir . DIRECTORY_SEPARATOR . $f;
+            return is_file($path) && $isImage($f);
+        }));
+    };
+
     $imgPool = [];
-    foreach($gedungFiles as $f){
-        if(!$f) continue;
-        $imgPool[] = asset('img/Gedungandintimate/' . $f);
+
+    // 1) preferred
+    foreach($preferredDirs as $dir){
+        foreach($scanDirFiles($dir) as $f){
+            $imgPool[] = asset('img/rumah/' . basename($dir) . '/' . $f);
+        }
     }
 
-    // Hapus duplikat (penting biar tidak dobel gambar)
+    // 2) sisanya di rumah (scan subfolder 1 level)
+    //    agar folder seperti home A / home package B dll juga terambil.
+    if(is_dir($rumahDir)){
+        foreach(scandir($rumahDir) as $item){
+            if($item === '.' || $item === '..') continue;
+            $itemPath = $rumahDir . DIRECTORY_SEPARATOR . $item;
+            if(!is_dir($itemPath)) continue;
+
+            // skip preferred yang sudah diproses
+            if(in_array($itemPath, $preferredDirs, true)) continue;
+
+            foreach($scanDirFiles($itemPath) as $f){
+                $imgPool[] = asset('img/rumah/' . $item . '/' . $f);
+            }
+        }
+    }
+
+    // Hapus duplikat
     $imgPool = array_values(array_unique($imgPool));
 
     // Cover ambil dari index 0
     $coverPhoto = $imgPool[0] ?? $fallback;
 
-    // Halaman: ambil urut dari index 1..6 agar cover tidak kepakai ulang
-    // Jika ternyata file sedikit, baru fallback.
     $pagePhoto = [];
-    // ambil 6 gambar berbeda dari pool (dimulai index 1)
-    for($i = 0; $i < 6; $i++){
+    for($i = 0; $i < 9; $i++){
         $img = $imgPool[$i + 1] ?? null;
-        if(!$img) $img = $fallback;
-        $pagePhoto[] = $img;
-    };
-    
+        $pagePhoto[] = $img ?: $fallback;
+    }
+
+    $gedungAFolder = public_path('img/rumah/gedung A');
+    $gedungBFolder = public_path('img/rumah/gedung B');
+    $gedungCFolder = public_path('img/rumah/gedung C');
+
+    $gedungAPool = $is_dir = is_dir($gedungAFolder) ? $scanDirFiles($gedungAFolder) : [];
+    if(is_dir($gedungAFolder)){
+        $gedungAPool = $scanDirFiles($gedungAFolder);
+        $pagePhoto[6] = asset('img/rumah/gedung A/' . ($gedungAPool[0] ?? '')) ?: $fallback;
+        $pagePhoto[7] = asset('img/rumah/gedung A/' . ($gedungAPool[1] ?? $gedungAPool[0] ?? '')) ?: $fallback;
+    }
+
+    if(is_dir($gedungBFolder)){
+        $gedungBPool = $scanDirFiles($gedungBFolder);
+        $pagePhoto[7] = asset('img/rumah/gedung B/' . ($gedungBPool[0] ?? $gedungAPool[0] ?? '')) ?: $fallback;
+    }
+
+    if(is_dir($gedungCFolder)){
+        $gedungCPool = $scanDirFiles($gedungCFolder);
+        $pagePhoto[8] = asset('img/rumah/gedung C/' . ($gedungCPool[0] ?? $fallback));
+    }
+
 @endphp
 
 <style>

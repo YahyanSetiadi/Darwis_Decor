@@ -49,7 +49,7 @@
                 <ul class="flex flex-col gap-3 text-xs md:text-sm font-light">
                     <li class="flex items-start gap-2.5">
                         <i class="fa-solid fa-location-dot" style="color: rgba(175,168,87,0.85); font-size:12px; margin-top:2px"></i>
-                        <span class="leading-relaxed" style="color: rgba(240,234,216,0.95);">Jl. Kenangan Indah No. 12, Kav. 4, Jakarta Selatan</span>
+                        <span class="leading-relaxed" style="color: rgba(240,234,216,0.95);">Jl. Garuda No.25 Jenggul Kalijambe Rt/Rw 06/01, Kec. Tarub, Kab Tegal</span>
                     </li>
                     <li class="flex items-center gap-2.5">
                         <i class="fa-solid fa-phone" style="color: rgba(175,168,87,0.85); font-size:12px"></i>

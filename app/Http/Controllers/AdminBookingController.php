@@ -21,7 +21,7 @@ class AdminBookingController extends Controller
         $booking->status = 'approved';
         $booking->save();
 
-        return redirect()->route('admin.bookings.index')->with('success', "Booking #{$booking->id} approved.");
+        return redirect()->route('admin.bookings.pending')->with('success', "Booking #{$booking->id} approved.");
     }
 
     public function destroy(Booking $booking)
